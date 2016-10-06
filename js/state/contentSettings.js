@@ -113,6 +113,9 @@ const hostSettingsToContentSettings = (hostSettings, contentSettingsSource) => {
     if (typeof hostSetting.flash === 'number') {
       addContentSettings(contentSettings.flashActive, hostPattern, '*', 'allow')
     }
+    if (typeof hostSetting.widevine === 'number') {
+      addContentSettings(contentSettings.widevineActive, hostPattern, '*', 'allow')
+    }
   }
   // On the second pass we consider only shieldsUp === false settings since we want those to take precedence.
   for (let hostPattern in hostSettings) {
@@ -166,6 +169,14 @@ const getContentSettingsFromSiteSettings = (appState, isPrivate = false) => {
       primaryPattern: '*'
     }],
     flashActive: [{
+      setting: 'block',
+      primaryPattern: '*'
+    }],
+    widevineEnabled: [{
+      setting: braveryDefaults.widevine ? 'allow' : 'block',
+      primaryPattern: '*'
+    }],
+    widevineActive: [{
       setting: 'block',
       primaryPattern: '*'
     }],

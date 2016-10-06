@@ -35,6 +35,7 @@ const httpsEverywhere = appConfig.resourceNames.HTTPS_EVERYWHERE
 const safeBrowsing = appConfig.resourceNames.SAFE_BROWSING
 const noScript = appConfig.resourceNames.NOSCRIPT
 const flash = appConfig.resourceNames.FLASH
+const widevine = appConfig.resourceNames.WIDEVINE
 
 const isDarwin = navigator.platform === 'MacIntel'
 const isWindows = navigator.platform && navigator.platform.includes('Win')
@@ -60,7 +61,8 @@ const permissionNames = {
   'fullscreenPermission': ['boolean'],
   'openExternalPermission': ['boolean'],
   'protocolRegistrationPermission': ['boolean'],
-  'flash': ['boolean', 'number']
+  'flash': ['boolean', 'number'],
+  'widevine': ['boolean', 'number']
 }
 
 const braveryPermissionNames = {
@@ -1292,6 +1294,14 @@ class SitePermissionsPage extends React.Component {
                             time: new Date(granted).toLocaleString()
                           }
                         }
+                      } else if (name === 'widevine') {
+                        if (granted === 1) {
+                          statusText = 'alwaysAllow'
+                        } else if (granted === 0) {
+                          statusText = 'allowOnce'
+                        } else {
+                          statusText = 'alwaysDeny'
+                        }
                       } else if (name === 'noScript' && typeof granted === 'number') {
                         if (granted === 1) {
                           statusText = 'allowUntilRestart'
@@ -1405,6 +1415,10 @@ class SecurityTab extends ImmutableComponent {
     aboutActions.setResourceEnabled(flash, e.target.value)
     ipc.send(messages.PREFS_RESTART, flash, e.target.value)
   }
+  onToggleWidevine (e) {
+    aboutActions.setResourceEnabled(widevine, e.target.value)
+    ipc.send(messages.PREFS_RESTART, widevine, e.target.value)
+  }
   render () {
     const lastPassPreferencesUrl = ('chrome-extension://' + extensionIds[passwordManagers.LAST_PASS] + '/tabDialog.html?dialog=preferences&cmd=open')
 
@@ -1474,6 +1488,25 @@ class SecurityTab extends ImmutableComponent {
               : <span data-l10n-id='enableFlashSubtextLinux' />
           }
         </span>
+      </SettingsList>
+      <SettingsList>
+        <SettingCheckbox checked={this.props.braveryDefaults.get('widevine')} dataL10nId={this.props.widevineInstalled ? 'enableWidevine' : 'installAndEnableWidevine'} onChange={this.onToggleWidevine} />
+        <div className='subtext'>
+          <span data-l10n-id='enableWidevineSubtext' />
+          <span className='fa fa-info-circle widevineInfoIcon'
+            onClick={aboutActions.newFrame.bind(null, {
+              location: appConfig.widevine.moreInfoUrl
+            }, true)}
+          />
+        </div>
+        <div className='subtext'>
+          <span data-l10n-id='enableWidevineSubtext2' />
+          <span className='fa fa-info-circle widevineInfoIcon'
+            onClick={aboutActions.newFrame.bind(null, {
+              location: appConfig.widevine.licenseUrl
+            }, true)}
+          />
+        </div>
       </SettingsList>
       <SitePermissionsPage siteSettings={this.props.siteSettings} names={permissionNames} />
     </div>
@@ -1615,6 +1648,7 @@ class AboutPreferences extends React.Component {
       hintNumber: this.getNextHintNumber(),
       languageCodes: Immutable.Map(),
       flashInstalled: false,
+      widevineInstalled: false,
       settings: Immutable.Map(),
       siteSettings: Immutable.Map(),
       braveryDefaults: Immutable.Map(),
@@ -1623,6 +1657,7 @@ class AboutPreferences extends React.Component {
       secondRecoveryKey: ''
     }
     aboutActions.checkFlashInstalled()
+    aboutActions.checkWidevineInstalled()
 
     ipc.on(messages.SETTINGS_UPDATED, (e, settings) => {
       this.setState({ settings: Immutable.fromJS(settings || {}) })
@@ -1638,6 +1673,9 @@ class AboutPreferences extends React.Component {
     })
     ipc.on(messages.FLASH_UPDATED, (e, flashInstalled) => {
       this.setState({ flashInstalled })
+    })
+    ipc.on(messages.WIDEVINE_UPDATED, (e, widevineInstalled) => {
+      this.setState({ widevineInstalled })
     })
     ipc.on(messages.LANGUAGE, (e, {langCode, languageCodes}) => {
       this.setState({ languageCodes })
@@ -1752,7 +1790,7 @@ class AboutPreferences extends React.Component {
           hideOverlay={this.setOverlayVisible.bind(this, false)} />
         break
       case preferenceTabs.SECURITY:
-        tab = <SecurityTab settings={settings} siteSettings={siteSettings} braveryDefaults={braveryDefaults} flashInstalled={this.state.flashInstalled} onChangeSetting={this.onChangeSetting} />
+        tab = <SecurityTab settings={settings} siteSettings={siteSettings} braveryDefaults={braveryDefaults} flashInstalled={this.state.flashInstalled} widevineInstalled={this.state.widevineInstalled} onChangeSetting={this.onChangeSetting} />
         break
       case preferenceTabs.ADVANCED:
         tab = <AdvancedTab settings={settings} onChangeSetting={this.onChangeSetting} />

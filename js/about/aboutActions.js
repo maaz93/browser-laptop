@@ -198,6 +198,10 @@ const aboutActions = {
     ipc.send(messages.CHECK_FLASH_INSTALLED)
   },
 
+  checkWidevineInstalled: function () {
+    ipc.send(messages.CHECK_WIDEVINE_INSTALLED)
+  },
+
   setResourceEnabled: function (resourceName, enabled) {
     aboutActions.dispatchAction({
       actionType: appConstants.APP_SET_RESOURCE_ENABLED,

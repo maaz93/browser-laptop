@@ -77,6 +77,7 @@ const spellCheck = require('./spellCheck')
 const locale = require('./locale')
 const ledger = require('./ledger')
 const flash = require('../js/flash')
+const widevine = require('../js/widevine')
 const contentSettings = require('../js/state/contentSettings')
 const privacy = require('../js/state/privacy')
 const basicAuth = require('./browser/basicAuth')
@@ -239,12 +240,13 @@ const initiateSessionStateSave = (beforeQuit) => {
   }
 }
 
-let loadAppStatePromise = SessionStore.loadAppState()
-
 let flashInitialized = false
-
+let widevineInitialized = false
 // Some settings must be set right away on startup, those settings should be handled here.
-loadAppStatePromise.then((initialState) => {
+let loadAppStatePromise = SessionStore.loadAppState((initialState) => {
+  if (!initialState) {
+    return
+  }
   const {HARDWARE_ACCELERATION_ENABLED, SMOOTH_SCROLL_ENABLED, SEND_CRASH_REPORTS} = require('../js/constants/settings')
   if (initialState.settings[HARDWARE_ACCELERATION_ENABLED] === false) {
     app.disableHardwareAcceleration()
@@ -262,7 +264,12 @@ loadAppStatePromise.then((initialState) => {
     if (flash.init()) {
       // Flash was initialized successfully
       flashInitialized = true
-      return
+    }
+  }
+  if (initialState.widevine && initialState.widevine.enabled === true) {
+    if (widevine.init()) {
+      // Widevine was initialized successfully
+      widevineInitialized = true
     }
   }
 })
@@ -413,6 +420,7 @@ app.on('ready', () => {
     const loadedPerWindowState = initialState.perWindowState
     delete initialState.perWindowState
     initialState.flashInitialized = flashInitialized
+    initialState.widevineInitialized = widevineInitialized
     appActions.setState(Immutable.fromJS(initialState))
     Menu.init(initialState, null)
     return loadedPerWindowState
@@ -491,6 +499,12 @@ app.on('ready', () => {
     ipcMain.on(messages.CHECK_FLASH_INSTALLED, (e) => {
       flash.checkFlashInstalled((installed) => {
         e.sender.send(messages.FLASH_UPDATED, installed)
+      })
+    })
+
+    ipcMain.on(messages.CHECK_WIDEVINE_INSTALLED, (e) => {
+      widevine.checkWidevineInstalled((installed) => {
+        e.sender.send(messages.WIDEVINE_UPDATED, installed)
       })
     })
 

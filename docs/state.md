@@ -72,6 +72,7 @@ AppStore
       httpsEverywhere: boolean,
       fingerprintingProtection: boolean,
       flash: (number|boolean), // approval expiration time if allowed, false if never allow
+      widevine: (number|boolean), // false = block widevine, 0 = allow once, 1 = allow always
       ledgerPayments: boolean, // False if site should not be paid by the ledger. Defaults to true.
       ledgerPaymentsShown: boolean, // False if site should not be paid by the ledger and should not be shown in the UI. Defaults to true.
       runInsecureContent: boolean // Allow active mixed content
@@ -115,6 +116,9 @@ AppStore
   },
   flash: {
     enabled: boolean // Enable flash
+  },
+  widevine: {
+    enabled: boolean // Enable Widevine
   },
   defaultWindowHeight: number,
   defaultWindowWidth: number,
@@ -414,6 +418,7 @@ WindowStore
     src: string, // the src for the popup window webview
   },
   flashInitialized: boolean, // Whether flash was initialized successfully. Cleared on shutdown.
+  widevineInitialized: boolean, // Whether Widevine was initialized successfully. Cleared on shutdown.
   cleanedOnShutdown: boolean, // whether app data was successfully cleared on shutdown
   lastAppVersion: string, // Version of the last file that was saved
   ledgerInfo: {

@@ -232,12 +232,13 @@ module.exports.cleanAppData = (data, isShutdown) => {
   data.notifications = []
   // Delete temp site settings
   data.temporarySiteSettings = {}
-  // Delete Flash state since this is checked on startup
+  // Delete Flash and Widevine state since this is checked on startup
   delete data.flashInitialized
   // Delete Recovery status on shut down
   try {
     delete data.ui.about.preferences.recoverySucceeded
   } catch (e) {}
+  delete data.widevineInitialized
   // We used to store a huge list of IDs but we didn't use them.
   // Get rid of them here.
   delete data.windows
@@ -331,18 +332,23 @@ module.exports.cleanSessionDataOnShutdown = () => {
 /**
  * Loads the browser state from storage.
  *
+ * @param syncCallback is called sync when the data is read sync and is available
+ *   The rest of the load is async, but some things need to be handled sync
+ *   before app.on ready such as widevine init.
  * @return a promise which resolves with the immutable browser state or
  * rejects if the state cannot be loaded.
  */
-module.exports.loadAppState = () => {
+module.exports.loadAppState = (syncInit) => {
+  let data
+  try {
+    data = fs.readFileSync(getStoragePath())
+    data = JSON.parse(data)
+  } catch (e) {}
+  if (syncInit) {
+    syncInit(data)
+  }
   return new Promise((resolve, reject) => {
-    let data
     try {
-      data = fs.readFileSync(getStoragePath())
-    } catch (e) {}
-
-    try {
-      data = JSON.parse(data)
       // autofill data migration
       if (data.autofill) {
         if (Array.isArray(data.autofill.addresses)) {

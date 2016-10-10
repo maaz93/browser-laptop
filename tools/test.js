@@ -1,7 +1,5 @@
 process.env.NODE_ENV = 'test'
 
-const spawn = require('child_process').spawn
-
 const testArgs = [
   'mocha', [
     '--compilers',
@@ -30,7 +28,7 @@ const watchArgs = [
 
 // TODO: check args
 
-const commandToRun = process.argv[0]
+const commandToRun = process.argv[2]
 let spawnArgs
 
 switch (commandToRun) {
@@ -47,9 +45,11 @@ switch (commandToRun) {
     spawnArgs = watchArgs
     break
   default:
-    console.log('ERROR! test type not passed in')
+    console.log('ERROR! test type not recognized: "'+commandToRun+'"')
     process.exit(1)
 }
+
+console.log('Running test command "'+process.argv[2]+'"')
 
 const spawn = require('child_process').spawn
 spawnArgs = Object.assign(spawnArgs, {

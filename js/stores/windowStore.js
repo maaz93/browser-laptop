@@ -599,7 +599,8 @@ const doAction = (action) => {
         windowState = windowState.mergeIn(['bookmarkDetail'], {
           currentDetail: action.currentDetail,
           originalDetail: action.originalDetail,
-          destinationDetail: action.destinationDetail
+          destinationDetail: action.destinationDetail,
+          shouldShowLocation: action.shouldShowLocation
         })
       }
       // Since the input values of bookmarks are bound, we need to notify the controls sync.

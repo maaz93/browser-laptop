@@ -902,6 +902,18 @@ Fired when the mouse clicks or hovers over a bookmark folder in the bookmarks to
 
 
 
+### setModalDialogDetail(className, props) 
+
+Set Modal Dialog detail
+
+**Parameters**
+
+**className**: `string`, name of modal dialog
+
+**props**: `Object`, properties of the modal dialog
+
+
+
 
 * * *
 

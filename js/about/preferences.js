@@ -572,10 +572,15 @@ class GeneralTab extends ImmutableComponent {
   constructor (e) {
     super()
     this.importBrowserDataNow = this.importBrowserDataNow.bind(this)
+    this.setAsDefaultBrowser = this.setAsDefaultBrowser.bind(this)
   }
 
   importBrowserDataNow () {
     aboutActions.importBrowerDataNow()
+  }
+
+  setAsDefaultBrowser () {
+    aboutActions.setAsDefaultBrowser()
   }
 
   enabled (keyArray) {
@@ -589,6 +594,13 @@ class GeneralTab extends ImmutableComponent {
       )
     })
     const defaultLanguage = this.props.languageCodes.find((lang) => lang.includes(navigator.language)) || 'en-US'
+    const defaultBrowser = getSetting(settings.IS_DEFAULT_BROWSER, this.props.settings)
+      ? <div className='sectionTitle' data-l10n-id='defaultBrowser' />
+      : <div>
+        <div className='sectionTitle' data-l10n-id='notDefaultBrowser' />
+        <Button l10nId='setAsDefault' className='primaryButton setAsDefaultButton'
+          onClick={this.setAsDefaultBrowser} />
+      </div>
     return <SettingsList>
       <div className='sectionTitle' data-l10n-id='generalSettings' />
       <SettingsList>
@@ -627,9 +639,16 @@ class GeneralTab extends ImmutableComponent {
         }
         <SettingCheckbox dataL10nId='disableTitleMode' prefKey={settings.DISABLE_TITLE_MODE} settings={this.props.settings} onChangeSetting={this.props.onChangeSetting} />
       </SettingsList>
-      <div className='sectionTitle' data-l10n-id='importBrowserData' />
-      <Button l10nId='importNow' className='primaryButton importNowButton'
-        onClick={this.importBrowserDataNow} />
+      <SettingsList>
+        <div className='sectionTitle' data-l10n-id='importBrowserData' />
+        <Button l10nId='importNow' className='primaryButton importNowButton'
+          onClick={this.importBrowserDataNow} />
+      </SettingsList>
+      <SettingsList>
+        {defaultBrowser}
+        <SettingCheckbox dataL10nId='checkDefaultOnStartup' prefKey={settings.CHECK_DEFAULT_ON_STARTUP}
+          settings={this.props.settings} onChangeSetting={this.props.onChangeSetting} />
+      </SettingsList>
     </SettingsList>
   }
 }

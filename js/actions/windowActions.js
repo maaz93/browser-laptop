@@ -1133,6 +1133,19 @@ const windowActions = {
       actionType: WindowConstants.WINDOW_SET_BOOKMARKS_TOOLBAR_SELECTED_FOLDER_ID,
       folderId
     })
+  },
+
+  /**
+   * Set Modal Dialog detail
+   * @param {string} className - name of modal dialog
+   * @param {Object} props - properties of the modal dialog
+   */
+  setModalDialogDetail: function (className, props) {
+    dispatch({
+      actionType: WindowConstants.WINDOW_SET_MODAL_DIALOG_DETAIL,
+      className,
+      props
+    })
   }
 }
 

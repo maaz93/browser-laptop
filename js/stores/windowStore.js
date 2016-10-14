@@ -834,7 +834,15 @@ const doAction = (action) => {
     case WindowConstants.WINDOW_SET_BOOKMARKS_TOOLBAR_SELECTED_FOLDER_ID:
       windowState = windowState.setIn(['ui', 'bookmarksToolbar', 'selectedFolderId'], action.folderId)
       break
-
+    case WindowConstants.WINDOW_SET_MODAL_DIALOG_DETAIL:
+      if (action.className && action.props === undefined) {
+        windowState = windowState.deleteIn(['modalDialogDetail', action.className])
+      } else if (action.className) {
+        windowState = windowState.setIn(['modalDialogDetail', action.className], Immutable.fromJS(action.props))
+      }
+      // Since the input values of address are bound, we need to notify the controls sync.
+      windowStore.emitChanges()
+      break
     default:
   }
 

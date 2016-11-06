@@ -579,6 +579,13 @@ const appActions = {
     AppDispatcher.dispatch({
       actionType: AppConstants.APP_DEFAULT_BROWSER_CHECK_COMPLETE
     })
+  },
+
+  setClearBrowserDataDefaults: function (defaultValues) {
+    AppDispatcher.dispatch({
+      actionType: AppConstants.APP_UPDATE_CLEAR_BROWSER_DATA_DEFAULTS,
+      defaultValues
+    })
   }
 }
 

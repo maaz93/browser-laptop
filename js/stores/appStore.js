@@ -773,6 +773,9 @@ const handleAppAction = (action) => {
     case AppConstants.APP_DEFAULT_BROWSER_CHECK_COMPLETE:
       appState = appState.set('defaultBrowserCheckComplete', {})
       break
+    case AppConstants.APP_UPDATE_CLEAR_BROWSER_DATA_DEFAULTS:
+      appState = appState.set('clearBrowsingDataDefaults', action.defaultValues)
+      break
     case WindowConstants.WINDOW_SET_FAVICON:
       appState = appState.set('sites', siteUtil.updateSiteFavicon(appState.get('sites'), action.frameProps.get('location'), action.favicon))
       appState = aboutNewTabState.updateSiteFavicon(appState, action)

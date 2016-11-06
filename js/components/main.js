@@ -995,7 +995,8 @@ class Main extends ImmutableComponent {
          clearBrowsingDataPanelIsVisible
           ? <ClearBrowsingDataPanel
             clearBrowsingDataDetail={this.props.windowState.get('clearBrowsingDataDetail')}
-            onHide={this.onHideClearBrowsingDataPanel} />
+            onHide={this.onHideClearBrowsingDataPanel}
+            defaultValues={this.props.appState.get('clearBrowsingDataDefaults')} />
           : null
         }
         {

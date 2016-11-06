@@ -3,6 +3,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 const React = require('react')
+const Immutable = require('immutable')
 const ImmutableComponent = require('./immutableComponent')
 const Dialog = require('./dialog')
 const Button = require('./button')
@@ -24,14 +25,38 @@ class ClearBrowsingDataPanel extends ImmutableComponent {
     this.onToggleAutofillData = this.onToggleSetting.bind(this, 'autofillData')
     this.onToggleSavedSiteSettings = this.onToggleSetting.bind(this, 'savedSiteSettings')
     this.onClear = this.onClear.bind(this)
+    this.getIsChecked = this.getIsChecked.bind(this)
+    this.getNewDefaultValues = this.getNewDefaultValues.bind(this)
+  }
+  getIsChecked (setting) {
+    const currentValue = this.props.clearBrowsingDataDetail.get(setting)
+    if (this.props.defaultValues && currentValue === undefined) {
+      return this.props.defaultValues.get(setting)
+    } else {
+      return currentValue
+    }
+  }
+  getNewDefaultValues () {
+    let newDefaultValues = new Immutable.Map()
+    let settings = ['browserHistory', 'downloadHistory', 'cachedImagesAndFiles', 'savedPasswords', 'allSiteCookies', 'autocompleteData', 'autofillData', 'savedSiteSettings']
+    // TODO: Optimize this to send back only defined settings
+    settings.forEach(function (setting) {
+      const currentValue = this.props.clearBrowsingDataDetail.get(setting)
+      newDefaultValues = newDefaultValues.set(setting, currentValue !== undefined ? currentValue : this.props.defaultValues.get(setting))
+    }.bind(this))
+    return newDefaultValues
   }
   onToggleSetting (setting, e) {
     windowActions.setClearBrowsingDataDetail(this.props.clearBrowsingDataDetail.set(setting, e.target.value))
   }
   onClear () {
-    appActions.clearAppData(this.props.clearBrowsingDataDetail)
-    this.props.onHide()
     let detail = this.props.clearBrowsingDataDetail
+    if (this.props.defaultValues) {
+      detail = this.getNewDefaultValues()
+    }
+    appActions.setClearBrowserDataDefaults(detail)
+    appActions.clearAppData(detail)
+    this.props.onHide()
     if (detail.get('allSiteCookies') && detail.get('browserHistory') &&
         detail.get('cachedImagesAndFiles')) {
       ipc.send(messages.PREFS_RESTART)
@@ -42,14 +67,14 @@ class ClearBrowsingDataPanel extends ImmutableComponent {
       <div className='clearBrowsingData' onClick={(e) => e.stopPropagation()}>
         <div className='formSection clearBrowsingDataTitle' data-l10n-id='clearBrowsingData' />
         <div className='formSection clearBrowsingDataOptions'>
-          <SwitchControl className='browserHistorySwitch' rightl10nId='browserHistory' checkedOn={this.props.clearBrowsingDataDetail.get('browserHistory')} onClick={this.onToggleBrowserHistory} />
-          <SwitchControl rightl10nId='downloadHistory' checkedOn={this.props.clearBrowsingDataDetail.get('downloadHistory')} onClick={this.onToggleDownloadHistory} />
-          <SwitchControl rightl10nId='cachedImagesAndFiles' checkedOn={this.props.clearBrowsingDataDetail.get('cachedImagesAndFiles')} onClick={this.onToggleCachedImagesAndFiles} />
-          <SwitchControl rightl10nId='savedPasswords' checkedOn={this.props.clearBrowsingDataDetail.get('savedPasswords')} onClick={this.onToggleSavedPasswords} />
-          <SwitchControl rightl10nId='allSiteCookies' checkedOn={this.props.clearBrowsingDataDetail.get('allSiteCookies')} onClick={this.onToggleAllSiteCookies} />
-          <SwitchControl className='autocompleteDataSwitch' rightl10nId='autocompleteData' checkedOn={this.props.clearBrowsingDataDetail.get('autocompleteData')} onClick={this.onToggleAutocompleteData} />
-          <SwitchControl className='autofillDataSwitch' rightl10nId='autofillData' checkedOn={this.props.clearBrowsingDataDetail.get('autofillData')} onClick={this.onToggleAutofillData} />
-          <SwitchControl className='siteSettingsSwitch' rightl10nId='savedSiteSettings' checkedOn={this.props.clearBrowsingDataDetail.get('savedSiteSettings')} onClick={this.onToggleSavedSiteSettings} />
+          <SwitchControl className='browserHistorySwitch' rightl10nId='browserHistory' checkedOn={this.getIsChecked('browserHistory')} onClick={this.onToggleBrowserHistory} />
+          <SwitchControl rightl10nId='downloadHistory' checkedOn={this.getIsChecked('downloadHistory')} onClick={this.onToggleDownloadHistory} />
+          <SwitchControl rightl10nId='cachedImagesAndFiles' checkedOn={this.getIsChecked('cachedImagesAndFiles')} onClick={this.onToggleCachedImagesAndFiles} />
+          <SwitchControl rightl10nId='savedPasswords' checkedOn={this.getIsChecked('savedPasswords')} onClick={this.onToggleSavedPasswords} />
+          <SwitchControl rightl10nId='allSiteCookies' checkedOn={this.getIsChecked('allSiteCookies')} onClick={this.onToggleAllSiteCookies} />
+          <SwitchControl className='autocompleteDataSwitch' rightl10nId='autocompleteData' checkedOn={this.getIsChecked('autocompleteData')} onClick={this.onToggleAutocompleteData} />
+          <SwitchControl className='autofillDataSwitch' rightl10nId='autofillData' checkedOn={this.getIsChecked('autofillData')} onClick={this.onToggleAutofillData} />
+          <SwitchControl className='siteSettingsSwitch' rightl10nId='savedSiteSettings' checkedOn={this.getIsChecked('savedSiteSettings')} onClick={this.onToggleSavedSiteSettings} />
         </div>
         <div className='formSection clearBrowsingDataButtons'>
           <Button l10nId='cancel' className='secondaryAltButton' onClick={this.props.onHide} />
